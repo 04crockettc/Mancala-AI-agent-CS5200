@@ -48,28 +48,33 @@ class MancalaBoard:
         new_state.pits[action] = 0
         pos = action
 
-        # sow stones counterclockwise
+       # sow stones counterclockwise
         while stones > 0:
-            pos = (pos + 1) % 14
+            pos += 1
+            # wrap around after player 2 store (pos 13)
+            if pos > 13:
+                pos = 0
             # skip opponent's store
             if new_state.current_player == 0 and pos == 13:
                 continue
             if new_state.current_player == 1 and pos == 6:
                 continue
-            # place in store
+            # place in player 1 store
             if pos == 6:
                 new_state.stores[0] += 1
+            # place in player 2 store
             elif pos == 13:
                 new_state.stores[1] += 1
-            else:
+            # place in pit
+            elif 0 <= pos <= 11:
                 new_state.pits[pos] += 1
             stones -= 1
 
         # check extra turn
         if new_state.current_player == 0 and pos == 6:
-            pass  # Player 1 gets extra turn
+            pass
         elif new_state.current_player == 1 and pos == 13:
-            pass  # Player 2 gets extra turn
+            pass
         # check capture
         elif new_state.current_player == 0 and 0 <= pos <= 5 and new_state.pits[pos] == 1:
             opposite = 11 - pos
@@ -105,10 +110,46 @@ class MancalaBoard:
                 score -= 1
         return score
 
+def minimax(state, depth, alpha, beta, is_maximizing):
+    if state.terminal_test() or depth == 0:
+        return state.evaluate()
+
+    if is_maximizing:
+        best_val = float('-inf')
+        for action in state.get_actions():
+            child = state.result(action)
+            val = minimax(child, depth - 1, alpha, beta, False)
+            best_val = max(best_val, val)
+            alpha = max(alpha, best_val)
+            if beta <= alpha:
+                break
+        return best_val
+
+    else:
+        best_val = float('inf')
+        for action in state.get_actions():
+            child = state.result(action)
+            val = minimax(child, depth - 1, alpha, beta, True)
+            best_val = min(best_val, val)
+            beta = min(beta, best_val)
+            if beta <= alpha:
+                break
+        return best_val
+
+
+def get_best_move(state, max_depth):
+    best_action = None
+    best_val = float('-inf')
+    for action in state.get_actions():
+        child = state.result(action)
+        val = minimax(child, max_depth - 1, float('-inf'), float('inf'), False)
+        if val >= best_val:
+            best_val = val
+            best_action = action
+    return best_action
+
 #test board
 if __name__ == "__main__":
     board = MancalaBoard()
     board.display()
-    print("Legal moves for Player 1:", board.get_actions())
-    print("Is terminal state?", board.terminal_test())
-    print("Board score:", board.evaluate())
+    print("AI best move is pit", get_best_move(board, 6))
