@@ -1,4 +1,4 @@
-# CS 5200
+# CS 5200: AI Methods
 # Project Title: An AI Agent for Mancala Adversarial Search Problem
 # Project Type: Adversarial Game
 
@@ -10,8 +10,6 @@
 # deterministic environment like Mancala. The agent will use a game-tree search 
 # algorithm such as mini-max and heuristic search functions.
 
-
-# display the board (12 pits and 2 stores)
 class MancalaBoard:
     def __init__(self):
         # 12 pits + 2 stores
@@ -21,7 +19,7 @@ class MancalaBoard:
         self.stores = [0, 0]
         self.current_player = 0  # 0 = Player 1, 1 = Player 2
 
-    
+    # FUCNTION: display the board
     def display(self):
         print("\n     Player 2 (AI)")
         print("  ", self.pits[11:5:-1])
@@ -29,6 +27,7 @@ class MancalaBoard:
         print("  ", self.pits[0:6])
         print("     Player 1 (Human)\n")
 
+    #FUNCTION: get available moves
     def get_actions(self):
         legal_moves = []
         if self.current_player == 0:
@@ -41,6 +40,7 @@ class MancalaBoard:
                     legal_moves.append(i)
         return legal_moves
     
+    # FUNCTION: perform the action chosen by the player
     def result(self, action):
         import copy
         new_state = copy.deepcopy(self)
@@ -87,11 +87,28 @@ class MancalaBoard:
             new_state.current_player = 1 - new_state.current_player
 
         return new_state
+    
+    # FUNCTION: checks to see if the goal state has been reached. 
+    def terminal_test(self):
+        if sum(self.pits[0:6]) == 0 or sum(self.pits[6:12]) == 0:
+            return True
+        return False
+    
+    # FUNCTION: evaluates the score
+    def evaluate(self):
+        score = self.stores[0] - self.stores[1]
+        for i in range(0, 6):
+            if self.pits[i] == (6 - i):
+                score += 1
+        for i in range(6, 12):
+            if self.pits[i] == (12 - i):
+                score -= 1
+        return score
 
-#test board diplay
+#test board
 if __name__ == "__main__":
     board = MancalaBoard()
     board.display()
     print("Legal moves for Player 1:", board.get_actions())
-    new_board = board.result(0)
-    new_board.display()
+    print("Is terminal state?", board.terminal_test())
+    print("Board score:", board.evaluate())
