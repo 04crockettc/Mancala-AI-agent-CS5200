@@ -10,6 +10,8 @@
 # deterministic environment like Mancala. The agent will use a game-tree search 
 # algorithm such as mini-max and heuristic search functions.
 
+import random
+
 class MancalaBoard:
     def __init__(self):
         # 12 pits + 2 stores
@@ -17,15 +19,15 @@ class MancalaBoard:
         # store[0] = Player 1 store, store[1] = Player 2 store
         self.pits = [4] * 12
         self.stores = [0, 0]
-        self.current_player = 0  # 0 = Player 1, 1 = Player 2
+        self.current_player = random.getrandbits(1)  # 0 = Player 1, 1 = Player 2
 
     # FUCNTION: display the board
     def display(self):
-        print("\n     Player 2 (AI)")
+        print("\n     AI Player")
         print("  ", self.pits[11:5:-1])
         print(f"[{self.stores[1]}]                  [{self.stores[0]}]")
         print("  ", self.pits[0:6])
-        print("     Player 1 (Human)\n")
+        print("     You\n")
 
     #FUNCTION: get available moves
     def get_actions(self):
@@ -101,12 +103,12 @@ class MancalaBoard:
     
     # FUNCTION: evaluates the score
     def evaluate(self):
-        score = self.stores[0] - self.stores[1]
-        for i in range(0, 6):
-            if self.pits[i] == (6 - i):
-                score += 1
+        score = self.stores[1] - self.stores[0]  # AI is Player 2
         for i in range(6, 12):
             if self.pits[i] == (12 - i):
+                score += 1
+        for i in range(0, 6):
+            if self.pits[i] == (6 - i):
                 score -= 1
         return score
 
@@ -151,13 +153,18 @@ def get_best_move(state, max_depth):
 def main():
     board = MancalaBoard()
     print("Welcome to Mancala!")
-    print("You are Player 1 (bottom row). Pits are numbered 0-5 left to right.")
+    print("The first player is randomly chosen at the start of each game. You are bottom row. Pits are numbered 1-6 left to right.")
+
+    if board.current_player == 0:
+        print("You Go First \n" )
+    else:
+        print("AI Player Goes First \n" )
+
+    print("Starting Game Board: ")
     board.display()
 
     while not board.terminal_test():
         if board.current_player == 0:
-            # Human turn
-           if board.current_player == 0:
             # Human turn
             legal = board.get_actions()
             print(f"Your legal moves: {[i + 1 for i in legal]}")
@@ -173,17 +180,14 @@ def main():
             board = board.result(action)
             print("\nYou picked pit", action + 1)
             board.display()
-
-
         else:
             # AI turn
-            print("AI is thinking...")
             action = get_best_move(board, 6)
             board = board.result(action)
-            print(f"AI picked pit {action}")
+            print(f"AI picked pit {action + 1}")
             board.display()
 
-    # Game over — transfer remaining stones
+    # Game over: transfer remaining stones
     for i in range(0, 6):
         board.stores[0] += board.pits[i]
         board.pits[i] = 0
