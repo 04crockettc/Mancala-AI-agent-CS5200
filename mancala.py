@@ -148,8 +148,60 @@ def get_best_move(state, max_depth):
             best_action = action
     return best_action
 
-#test board
-if __name__ == "__main__":
+def main():
     board = MancalaBoard()
+    print("Welcome to Mancala!")
+    print("You are Player 1 (bottom row). Pits are numbered 0-5 left to right.")
     board.display()
-    print("AI best move is pit", get_best_move(board, 6))
+
+    while not board.terminal_test():
+        if board.current_player == 0:
+            # Human turn
+           if board.current_player == 0:
+            # Human turn
+            legal = board.get_actions()
+            print(f"Your legal moves: {[i + 1 for i in legal]}")
+            while True:
+                try:
+                    action = int(input("Pick a pit (1-6): ")) - 1
+                    if action in legal:
+                        break
+                    else:
+                        print("Invalid move, pick from your legal moves.")
+                except ValueError:
+                    print("Please enter a number.")
+            board = board.result(action)
+            print("\nYou picked pit", action + 1)
+            board.display()
+
+
+        else:
+            # AI turn
+            print("AI is thinking...")
+            action = get_best_move(board, 6)
+            board = board.result(action)
+            print(f"AI picked pit {action}")
+            board.display()
+
+    # Game over — transfer remaining stones
+    for i in range(0, 6):
+        board.stores[0] += board.pits[i]
+        board.pits[i] = 0
+    for i in range(6, 12):
+        board.stores[1] += board.pits[i]
+        board.pits[i] = 0
+
+    print("Game Over!")
+    board.display()
+    print(f"Player 1 (You): {board.stores[0]} stones")
+    print(f"Player 2 (AI):  {board.stores[1]} stones")
+
+    if board.stores[0] > board.stores[1]:
+        print("You win!")
+    elif board.stores[1] > board.stores[0]:
+        print("AI wins!")
+    else:
+        print("It's a draw!")
+
+if __name__ == "__main__":
+    main()
