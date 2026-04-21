@@ -155,7 +155,6 @@ def minimax(state, depth, alpha, beta, is_maximizing):
                 break
         return best_val
 
-
 def get_best_move(state, max_depth):
     best_action = None
     best_val = float('-inf')
@@ -166,6 +165,54 @@ def get_best_move(state, max_depth):
             best_val = val
             best_action = action
     return best_action
+
+def run_simulation(num_games=100):
+    ai_wins = 0
+    human_wins = 0
+    draws = 0
+    total_margin = 0
+
+    for game in range(num_games):
+        board = MancalaBoard()
+        board.current_player = game % 2  # alternate who goes first
+
+        while not board.terminal_test():
+            if board.current_player == 1:
+                # AI turn
+                action = get_best_move(board, 10)
+            else:
+                # Random player turn
+                action = random.choice(board.get_actions())
+            board = board.result(action)
+
+        # transfer remaining stones
+        for i in range(0, 6):
+            board.stores[0] += board.pits[i]
+            board.pits[i] = 0
+        for i in range(6, 12):
+            board.stores[1] += board.pits[i]
+            board.pits[i] = 0
+
+        margin = board.stores[1] - board.stores[0]
+        total_margin += margin
+
+        if board.stores[1] > board.stores[0]:
+            ai_wins += 1
+        elif board.stores[0] > board.stores[1]:
+            human_wins += 1
+        else:
+            draws += 1
+
+        print(f"Game {game + 1}/{num_games} complete | AI: {board.stores[1]} Human: {board.stores[0]}")
+
+    print("\n========== SIMULATION RESULTS ==========")
+    print(f"Total Games:           {num_games}")
+    print(f"AI Wins:               {ai_wins}")
+    print(f"Random Player Wins:    {human_wins}")
+    print(f"Draws:                 {draws}")
+    print(f"AI Win Rate:           {ai_wins / num_games * 100:.1f}%")
+    print(f"Average Margin:        {total_margin / num_games:.1f} stones")
+    print("========================================")
 
 def main():
     board = MancalaBoard()
@@ -225,4 +272,4 @@ def main():
         print("It's a draw!")
 
 if __name__ == "__main__":
-    main()
+        main()
