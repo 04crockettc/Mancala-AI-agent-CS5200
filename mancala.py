@@ -1,6 +1,7 @@
 # CS 5200: AI Methods
 # Project Title: An AI Agent for Mancala Adversarial Search Problem
 # Project Type: Adversarial Game
+# Project Contributers: Claire Crockett
 
 # Project Summary: Mancala is a two-player board game where players take turns 
 # distributing stones across pits with the goal of collecting the most stones. 
@@ -166,6 +167,7 @@ def get_best_move(state, max_depth):
             best_action = action
     return best_action
 
+# FUNCTION: Simulation to test AI by playing 100 game against randomly selected moves. 
 def run_simulation(num_games=100):
     ai_wins = 0
     human_wins = 0
@@ -214,19 +216,21 @@ def run_simulation(num_games=100):
     print(f"Average Margin:        {total_margin / num_games:.1f} stones")
     print("========================================")
 
+#FUNCTION: main function that perform the game loop for player
 def main():
     board = MancalaBoard()
     print("Welcome to Mancala!")
     print("The first player is randomly chosen at the start of each game. You are bottom row. Pits are numbered 1-6 left to right.")
 
     if board.current_player == 0:
-        print("You Go First \n" )
+        print("\n You Go First \n" )
     else:
         print("AI Player Goes First \n" )
 
     print("Starting Game Board: ")
     board.display()
 
+    # perform game loop
     while not board.terminal_test():
         if board.current_player == 0:
             # Human turn
@@ -263,7 +267,7 @@ def main():
     board.display()
     print(f"Player 1 (You): {board.stores[0]} stones")
     print(f"Player 2 (AI):  {board.stores[1]} stones")
-
+    # display winner
     if board.stores[0] > board.stores[1]:
         print("You win!")
     elif board.stores[1] > board.stores[0]:
