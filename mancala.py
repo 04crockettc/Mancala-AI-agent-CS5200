@@ -11,6 +11,7 @@
 # algorithm such as mini-max and heuristic search functions.
 
 import random
+import time
 
 class MancalaBoard:
     def __init__(self):
@@ -103,13 +104,29 @@ class MancalaBoard:
     
     # FUNCTION: evaluates the score
     def evaluate(self):
-        score = self.stores[1] - self.stores[0]  # AI is Player 2
+        score = (self.stores[1] - self.stores[0]) * 2  
+        #reward the AI
         for i in range(6, 12):
-            if self.pits[i] == (12 - i):
-                score += 1
+            # extra turn setup bonus
+            if self.pits[i] == (13 - i):
+                score += 3
+            # capture opportunity bonus
+            if self.pits[i] == 0 and self.pits[11 - i] > 0:
+                score -= 2  # danger: human can capture here
+            # stone count advantage
+            score += self.pits[i] * 0.5
+
+        # penelize the AI for the human doing well
         for i in range(0, 6):
+            # extra turn setup for human 
             if self.pits[i] == (6 - i):
-                score -= 1
+                score -= 3
+            # human capture opportunity 
+            if self.pits[i] == 0 and self.pits[11 - i] > 0:
+                score += 2
+            # human stone count
+            score -= self.pits[i] * 0.5
+
         return score
 
 def minimax(state, depth, alpha, beta, is_maximizing):
@@ -182,7 +199,7 @@ def main():
             board.display()
         else:
             # AI turn
-            action = get_best_move(board, 6)
+            action = get_best_move(board, 8) #change depth 
             board = board.result(action)
             print(f"AI picked pit {action + 1}")
             board.display()
