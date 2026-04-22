@@ -12,7 +12,6 @@
 # algorithm such as mini-max and heuristic search functions.
 
 import random
-import time
 
 class MancalaBoard:
     def __init__(self):
@@ -52,26 +51,33 @@ class MancalaBoard:
         new_state.pits[action] = 0
         pos = action
 
-       # sow stones counterclockwise
+        # sow stones counterclockwise
         while stones > 0:
-            pos += 1
-            # wrap around after player 2 store (pos 13)
-            if pos > 13:
-                pos = 0
+            pos = (pos + 1) % 14  # positions 0–13
+
             # skip opponent's store
             if new_state.current_player == 0 and pos == 13:
                 continue
             if new_state.current_player == 1 and pos == 6:
                 continue
-            # place in player 1 store
+
+            # place stone in correct location
             if pos == 6:
+                # Player 1 store
                 new_state.stores[0] += 1
-            # place in player 2 store
+
             elif pos == 13:
+                # Player 2 store
                 new_state.stores[1] += 1
-            # place in pit
-            elif 0 <= pos <= 11:
+
+            elif 0 <= pos <= 5:
+                # Player 1 pits
                 new_state.pits[pos] += 1
+
+            elif 7 <= pos <= 12:
+                # Player 2 pits (shift index!)
+                new_state.pits[pos - 1] += 1
+
             stones -= 1
 
         # check extra turn
@@ -80,13 +86,13 @@ class MancalaBoard:
         elif new_state.current_player == 1 and pos == 13:
             pass
         # check capture
-        elif new_state.current_player == 0 and 0 <= pos <= 5 and new_state.pits[pos] == 1:
+        elif new_state.current_player == 0 and 0 <= pos <= 5 and new_state.pits[pos] == 1 and new_state.pits[11 - pos] != 0:
             opposite = 11 - pos
             new_state.stores[0] += new_state.pits[opposite] + 1
             new_state.pits[opposite] = 0
             new_state.pits[pos] = 0
             new_state.current_player = 1
-        elif new_state.current_player == 1 and 6 <= pos <= 11 and new_state.pits[pos] == 1:
+        elif new_state.current_player == 1 and 6 <= pos <= 11 and new_state.pits[pos] == 1 and new_state.pits[11 - pos] != 0:
             opposite = 11 - pos
             new_state.stores[1] += new_state.pits[opposite] + 1
             new_state.pits[opposite] = 0
@@ -106,25 +112,25 @@ class MancalaBoard:
     # FUNCTION: evaluates the score
     def evaluate(self):
         score = (self.stores[1] - self.stores[0]) * 2  
-        #reward the AI
+        # Evaluation of the AI's move
         for i in range(6, 12):
             # extra turn setup bonus
             if self.pits[i] == (13 - i):
                 score += 3
             # capture opportunity bonus
             if self.pits[i] == 0 and self.pits[11 - i] > 0:
-                score -= 2  # danger: human can capture here
+                score -= 3
             # stone count advantage
             score += self.pits[i] * 0.5
 
-        # penelize the AI for the human doing well
+        # Evaluation of the human's move
         for i in range(0, 6):
             # extra turn setup for human 
             if self.pits[i] == (6 - i):
                 score -= 3
             # human capture opportunity 
             if self.pits[i] == 0 and self.pits[11 - i] > 0:
-                score += 2
+                score += 3
             # human stone count
             score -= self.pits[i] * 0.5
 
@@ -161,7 +167,7 @@ def get_best_move(state, max_depth):
     best_val = float('-inf')
     for action in state.get_actions():
         child = state.result(action)
-        val = minimax(child, max_depth - 1, float('-inf'), float('inf'), False)
+        val = minimax(child, max_depth - 1, float('-inf'), float('inf'), True)
         if val >= best_val:
             best_val = val
             best_action = action
@@ -181,7 +187,7 @@ def run_simulation(num_games=100):
         while not board.terminal_test():
             if board.current_player == 1:
                 # AI turn
-                action = get_best_move(board, 10)
+                action = get_best_move(board, 8)
             else:
                 # Random player turn
                 action = random.choice(board.get_actions())
@@ -276,4 +282,4 @@ def main():
         print("It's a draw!")
 
 if __name__ == "__main__":
-        main()
+        run_simulation()
