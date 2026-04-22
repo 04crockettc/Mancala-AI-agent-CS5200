@@ -282,4 +282,4 @@ def main():
         print("It's a draw!")
 
 if __name__ == "__main__":
-        run_simulation()
+        main()
